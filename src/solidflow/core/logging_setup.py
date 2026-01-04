@@ -41,6 +41,14 @@ def setup_logging(
 
     log_file = log_dir / "solidflow.log"
 
+    # Важно для macOS .app:
+    # PyVista тянет matplotlib, а matplotlib может перестраивать кэш шрифтов (долго)
+    # и конфликтовать с другими Python окружениями через общий ~/.matplotlib.
+    # Уводим кэш в изолированную папку проекта, если переменная не задана явно.
+    mpl_dir = log_dir / "matplotlib"
+    mpl_dir.mkdir(parents=True, exist_ok=True)
+    os.environ.setdefault("MPLCONFIGDIR", str(mpl_dir))
+
     env_level = (level or os.environ.get("SOLIDFLOW_LOG_LEVEL") or "INFO").upper()
     numeric_level = getattr(logging, env_level, logging.INFO)
 

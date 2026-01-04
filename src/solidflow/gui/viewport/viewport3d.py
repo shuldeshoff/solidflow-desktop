@@ -3,6 +3,7 @@
 """
 
 import logging
+import time
 
 from PySide6.QtWidgets import QFrame, QVBoxLayout
 
@@ -43,6 +44,7 @@ class Viewport3D(QFrame):
 
     def _init_plotter(self):
         """Ленивая инициализация тяжелых зависимостей (PyVista/VTK/QtInteractor)."""
+        t0 = time.perf_counter()
         self._log.info("Initializing QtInteractor/PyVista...")
         try:
             import pyvista as pv  # тяжелый импорт
@@ -55,7 +57,7 @@ class Viewport3D(QFrame):
         self.plotter = QtInteractor(self)
         self.plotter.set_background("grey")
         self.layout().addWidget(self.plotter)
-        self._log.info("QtInteractor initialized.")
+        self._log.info("QtInteractor initialized (%.2fs).", time.perf_counter() - t0)
 
     def _setup_plotter(self):
         """Настройка plotter"""
