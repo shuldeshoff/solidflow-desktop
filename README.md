@@ -3,6 +3,8 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)]()
+[![CI](https://github.com/shuldeshoff/solidflow-desktop/workflows/CI/badge.svg)](https://github.com/shuldeshoff/solidflow-desktop/actions)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Desktop-платформа подготовки и оптимизации моделей для 3D-печати и мехобработки.
 
@@ -76,17 +78,22 @@ python -m solidflow
 
 ## Статус проекта
 
-**Текущий этап:** MVP Этап 1 - Базовая инфраструктура ✅
+**Текущий этап:** MVP Этап 2 - 3D Визуализация ✅
 
 Проект находится в активной разработке.
 
 **Реализовано:**
-* Структура проекта
-* Базовое Qt приложение
-* Конфигурационные файлы
-* Система тестирования
+* Структура проекта ✅
+* Базовое Qt приложение ✅
+* 3D viewport с PyVista ✅
+* Импорт и отображение STL файлов ✅
+* Режимы отображения (Wireframe/Solid) ✅
+* Интерактивная навигация ✅
+* Панель информации о модели ✅
+* CI/CD (GitHub Actions) ✅
+* Инструменты качества кода (black, flake8) ✅
 
-**Следующий этап:** Интеграция 3D viewport (PyVista)
+**Следующий этап:** Базовый анализ и обработка mesh
 
 ## Документация
 
