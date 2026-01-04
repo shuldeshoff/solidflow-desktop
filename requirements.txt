@@ -4,6 +4,7 @@ PySide6>=6.5.0
 # 3D Visualization
 pyvista>=0.40.0
 vtk>=9.2.0
+pyvistaqt>=0.11.0
 
 # Geometry (только mesh для MVP)
 trimesh>=3.20.0
@@ -13,4 +14,3 @@ numpy>=1.24.0
 
 # Utilities
 pyyaml>=6.0
-
