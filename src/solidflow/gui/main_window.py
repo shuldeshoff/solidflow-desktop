@@ -339,9 +339,9 @@ class MainWindow(QMainWindow):
                     info += '<span style="color: red;">✗ Найдены проблемы</span><br>'
 
                 if not self.current_validation["watertight"]:
-                    info += '<span style="color: orange;">⚠ Не герметична</span><br>'
+                    info += '<span style="color: orange;">Внимание: не герметична (not watertight)</span><br>'
                 if not self.current_validation["manifold"]["is_manifold"]:
-                    info += '<span style="color: orange;">⚠ Non-manifold</span><br>'
+                    info += '<span style="color: orange;">Внимание: non-manifold геометрия</span><br>'
 
             self.info_text.setText(info)
         else:
