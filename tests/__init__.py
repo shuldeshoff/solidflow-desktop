@@ -1,0 +1,4 @@
+"""
+Тесты SolidFlow Desktop
+"""
+

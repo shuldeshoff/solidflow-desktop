@@ -1,0 +1,14 @@
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-qt>=4.2.0
+
+# Code Quality
+black>=23.7.0
+flake8>=6.1.0
+
+# Building
+pyinstaller>=5.13.0
+setuptools>=68.0.0
+wheel>=0.41.0
+
