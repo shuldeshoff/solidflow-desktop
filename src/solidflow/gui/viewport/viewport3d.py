@@ -2,9 +2,9 @@
 3D Viewport виджет на основе PyVista
 """
 
-from PySide6.QtWidgets import QFrame
-import pyvista as pv
-from pyvistaqt.plotting import QtInteractor
+import logging
+
+from PySide6.QtWidgets import QFrame, QVBoxLayout
 
 
 class Viewport3D(QFrame):
@@ -19,9 +19,18 @@ class Viewport3D(QFrame):
         """
         super().__init__(parent)
 
+        self._log = logging.getLogger("SolidFlow.Viewport3D")
+
         # Создание PyVista plotter
-        self.plotter = QtInteractor(self)
-        self.plotter.set_background("grey")
+        self.plotter = None
+        self._pv = None
+
+        # Layout, чтобы QtInteractor гарантированно отображался внутри QFrame
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(layout)
+
+        self._init_plotter()
 
         # Текущая загруженная модель
         self.current_mesh = None
@@ -32,8 +41,27 @@ class Viewport3D(QFrame):
 
         self._setup_plotter()
 
+    def _init_plotter(self):
+        """Ленивая инициализация тяжелых зависимостей (PyVista/VTK/QtInteractor)."""
+        self._log.info("Initializing QtInteractor/PyVista...")
+        try:
+            import pyvista as pv  # тяжелый импорт
+            from pyvistaqt.plotting import QtInteractor
+        except Exception:
+            self._log.exception("Failed to import pyvista/pyvistaqt")
+            raise
+
+        self._pv = pv
+        self.plotter = QtInteractor(self)
+        self.plotter.set_background("grey")
+        self.layout().addWidget(self.plotter)
+        self._log.info("QtInteractor initialized.")
+
     def _setup_plotter(self):
         """Настройка plotter"""
+        if self.plotter is None:
+            return
+
         # Добавление осей координат (небольшие, в углу)
         self.plotter.add_axes(
             interactive=False,
@@ -56,13 +84,17 @@ class Viewport3D(QFrame):
         Args:
             mesh: PyVista mesh или путь к файлу
         """
+        if self.plotter is None or self._pv is None:
+            self._log.error("Viewport is not initialized (plotter is None).")
+            return
+
         # Удаление предыдущей модели
         if self.current_actor is not None:
             self.plotter.remove_actor(self.current_actor)
 
         # Загрузка mesh
         if isinstance(mesh, str):
-            self.current_mesh = pv.read(mesh)
+            self.current_mesh = self._pv.read(mesh)
         else:
             self.current_mesh = mesh
 

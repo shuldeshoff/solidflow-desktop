@@ -2,6 +2,7 @@
 Главное окно приложения
 """
 
+import logging
 from PySide6.QtWidgets import (
     QMainWindow,
     QWidget,
@@ -14,7 +15,7 @@ from PySide6.QtWidgets import (
     QSplitter,
 )
 from PySide6.QtGui import QAction, QCursor
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from pathlib import Path
 from solidflow.core.config import Config
 from solidflow.gui.viewport.viewport3d import Viewport3D
@@ -32,11 +33,16 @@ class MainWindow(QMainWindow):
         """Инициализация главного окна"""
         super().__init__()
 
+        self._log = logging.getLogger("SolidFlow.MainWindow")
+        self._log.info("MainWindow init start")
+
         self.setWindowTitle(Config.WINDOW_TITLE)
         self.resize(Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT)
 
         # 3D viewport
         self.viewport = None
+        self._viewport_host = None
+        self._viewport_placeholder = None
 
         # Текущий файл
         self.current_file = None
@@ -52,6 +58,12 @@ class MainWindow(QMainWindow):
         self._create_menu()
         self._create_toolbar()
         self._update_window_title()
+
+        # Откладываем тяжелую инициализацию 3D viewport на следующий тик event loop,
+        # чтобы окно успело показаться и не выглядело как "зависло".
+        QTimer.singleShot(0, self._init_viewport_deferred)
+
+        self._log.info("MainWindow init end")
 
     def _update_window_title(self):
         """Обновить заголовок окна (файл + признак несохраненных изменений)."""
@@ -125,9 +137,17 @@ class MainWindow(QMainWindow):
         # Splitter для разделения viewport и боковой панели
         splitter = QSplitter(Qt.Horizontal)
 
-        # 3D Viewport
-        self.viewport = Viewport3D()
-        splitter.addWidget(self.viewport)
+        # 3D Viewport (контейнер + заглушка; реальный Viewport3D создадим позже)
+        self._viewport_host = QWidget()
+        host_layout = QVBoxLayout()
+        host_layout.setContentsMargins(0, 0, 0, 0)
+        self._viewport_host.setLayout(host_layout)
+
+        self._viewport_placeholder = QLabel("Инициализация 3D Viewport...")
+        self._viewport_placeholder.setAlignment(Qt.AlignCenter)
+        host_layout.addWidget(self._viewport_placeholder)
+
+        splitter.addWidget(self._viewport_host)
 
         # Боковая панель с информацией (пока заглушка)
         info_panel = self._create_info_panel()
@@ -140,6 +160,33 @@ class MainWindow(QMainWindow):
         layout.addWidget(splitter)
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
+
+    def _init_viewport_deferred(self):
+        """Инициализировать 3D viewport после показа окна, с логированием ошибок."""
+        if self.viewport is not None:
+            return
+        if self._viewport_host is None:
+            return
+
+        self._log.info("Initializing Viewport3D (deferred)")
+        try:
+            self.viewport = Viewport3D(parent=self._viewport_host)
+        except Exception:
+            self._log.exception("Viewport3D initialization failed")
+            if self._viewport_placeholder is not None:
+                self._viewport_placeholder.setText(
+                    "Ошибка инициализации 3D Viewport.\nСмотри лог: ~/Library/Logs/SolidFlow/solidflow.log"
+                )
+            return
+
+        # Убираем заглушку и вставляем реальный viewport
+        if self._viewport_placeholder is not None:
+            self._viewport_placeholder.setParent(None)
+            self._viewport_placeholder.deleteLater()
+            self._viewport_placeholder = None
+
+        self._viewport_host.layout().addWidget(self.viewport)
+        self._log.info("Viewport3D initialized and attached")
 
     def _create_info_panel(self):
         """Создать панель информации"""
