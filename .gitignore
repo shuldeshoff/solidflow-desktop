@@ -30,6 +30,7 @@ MANIFEST
 # PyInstaller
 *.manifest
 *.spec
+!solidflow.spec
 
 # Unit test / coverage reports
 htmlcov/
@@ -142,4 +143,7 @@ dist/
 *.app
 *.dmg
 *.exe
+
+# Local build logs
+build_logs/
 
