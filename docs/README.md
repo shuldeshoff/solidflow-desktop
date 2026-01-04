@@ -80,9 +80,9 @@ SolidFlow Desktop — это кроссплатформенное desktop-при
 * [Руководство по разработке](DEV_GUIDE.md)
 * [Чеклист релиза](RELEASE_CHECKLIST.md)
 * [План MVP](mvp-plan.md) - план минимально жизнеспособного продукта
+* [Итоговый отчет MVP](mvp-stage6-report.md) - отчет по всем этапам
 * [План создания каркаса проекта](project-setup-plan.md)
 * [Архитектура системы](architecture.md)
 * [Функциональные требования](features.md)
 * [Технический стек](tech-stack.md)
-* [Отчеты о прогрессе](MVP_PROGRESS_REPORT.md)
 
