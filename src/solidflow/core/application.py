@@ -3,6 +3,7 @@
 """
 
 from PySide6.QtWidgets import QApplication
+from solidflow.core.config import Config
 from solidflow.gui.main_window import MainWindow
 
 
@@ -19,7 +20,7 @@ class Application:
         self.qt_app = QApplication(argv)
         self.qt_app.setApplicationName("SolidFlow Desktop")
         self.qt_app.setOrganizationName("SolidFlow")
-        self.qt_app.setApplicationVersion("0.1.0")
+        self.qt_app.setApplicationVersion(Config.VERSION)
 
         self.main_window = None
 

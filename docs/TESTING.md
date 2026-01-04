@@ -130,6 +130,17 @@ dist\SolidFlow.exe  # Windows
 python --version  # должна быть 3.10+
 ```
 
+2. Где смотреть логи (особенно для macOS .app):
+
+- macOS `.app`: основной лог пишется в `~/Library/Logs/SolidFlow/solidflow.log`
+- Запуск из терминала для диагностики:
+
+```bash
+~/Applications/SolidFlow.app/Contents/MacOS/SolidFlow > ~/solidflow-run.log 2>&1
+tail -n 200 ~/solidflow-run.log
+tail -n 200 ~/Library/Logs/SolidFlow/solidflow.log
+```
+
 2. Проверьте зависимости:
 ```bash
 pip list | grep -i "pyside6\|pyvista\|trimesh"
