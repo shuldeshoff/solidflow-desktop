@@ -10,7 +10,7 @@ class Config:
     """Базовая конфигурация приложения"""
 
     # Версия приложения
-    VERSION = "0.1.0"
+    VERSION = "0.3.1"
 
     # Пути
     ROOT_DIR = Path(__file__).parent.parent.parent.parent

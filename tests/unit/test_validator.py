@@ -3,12 +3,15 @@
 """
 
 import pytest
-import trimesh
+
+pytest.importorskip("trimesh")
+
 from solidflow.analysis.validator import MeshValidator
 
 
 def test_validator_watertight():
     """Тест проверки герметичности"""
+    trimesh = pytest.importorskip("trimesh")
     # Создаем герметичный куб
     mesh = trimesh.creation.box()
     validator = MeshValidator(mesh)
@@ -18,6 +21,7 @@ def test_validator_watertight():
 
 def test_validator_validation():
     """Тест полной валидации"""
+    trimesh = pytest.importorskip("trimesh")
     mesh = trimesh.creation.box()
     validator = MeshValidator(mesh)
 
@@ -31,6 +35,7 @@ def test_validator_validation():
 
 def test_validator_degenerate_faces():
     """Тест проверки вырожденных граней"""
+    trimesh = pytest.importorskip("trimesh")
     mesh = trimesh.creation.box()
     validator = MeshValidator(mesh)
 

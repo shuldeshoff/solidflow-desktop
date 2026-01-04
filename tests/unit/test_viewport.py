@@ -3,13 +3,18 @@
 """
 
 import pytest
-from PySide6.QtWidgets import QApplication
+
+pytest.importorskip("PySide6")
+pytest.importorskip("pyvista")
+pytest.importorskip("pyvistaqt")
+
 from solidflow.gui.viewport.viewport3d import Viewport3D
 
 
 @pytest.fixture
 def qapp():
     """Fixture для Qt приложения"""
+    QApplication = pytest.importorskip("PySide6.QtWidgets").QApplication
     app = QApplication.instance()
     if app is None:
         app = QApplication([])

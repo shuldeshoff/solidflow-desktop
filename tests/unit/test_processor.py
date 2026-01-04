@@ -3,12 +3,17 @@
 """
 
 import pytest
-import pyvista as pv
+
+pytest.importorskip("trimesh")
+pytest.importorskip("pyvista")
+
 from solidflow.geometry.mesh.processor import MeshProcessor
 
 
 def test_processor_creation():
     """Тест создания процессора"""
+    pytest.importorskip("trimesh")
+    pv = pytest.importorskip("pyvista")
     mesh = pv.Cube()
     processor = MeshProcessor(mesh)
 
@@ -17,6 +22,8 @@ def test_processor_creation():
 
 def test_processor_remove_duplicates():
     """Тест удаления дубликатов"""
+    pytest.importorskip("trimesh")
+    pv = pytest.importorskip("pyvista")
     mesh = pv.Cube()
     processor = MeshProcessor(mesh)
 
@@ -28,6 +35,8 @@ def test_processor_remove_duplicates():
 
 def test_processor_smooth():
     """Тест сглаживания"""
+    pytest.importorskip("trimesh")
+    pv = pytest.importorskip("pyvista")
     mesh = pv.Cube()
     processor = MeshProcessor(mesh)
 

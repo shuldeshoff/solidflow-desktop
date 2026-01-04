@@ -7,7 +7,7 @@ from solidflow.core.config import Config
 
 def test_config_version():
     """Проверка версии"""
-    assert Config.VERSION == "0.1.0"
+    assert Config.VERSION == "0.3.1"
 
 
 def test_config_window_size():

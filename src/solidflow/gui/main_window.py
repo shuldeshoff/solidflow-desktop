@@ -51,6 +51,70 @@ class MainWindow(QMainWindow):
         self._setup_ui()
         self._create_menu()
         self._create_toolbar()
+        self._update_window_title()
+
+    def _update_window_title(self):
+        """Обновить заголовок окна (файл + признак несохраненных изменений)."""
+        title = Config.WINDOW_TITLE
+
+        if self.current_file:
+            title += f" - {Path(self.current_file).name}"
+
+        if self.is_modified:
+            title += " *"
+
+        self.setWindowTitle(title)
+
+    def _set_modified(self, modified: bool):
+        """Установить флаг изменений и обновить UI."""
+        self.is_modified = modified
+        self._update_window_title()
+
+    def _maybe_save_changes(self) -> bool:
+        """
+        Предложить сохранить изменения, если текущая модель модифицирована.
+
+        Returns:
+            bool: True если можно продолжать (изменения сохранены/отменены),
+                  False если пользователь отменил действие.
+        """
+        if not self.is_modified:
+            return True
+
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Warning)
+        msg_box.setWindowTitle("Несохраненные изменения")
+        msg_box.setText("Есть несохраненные изменения. Сохранить перед продолжением?")
+        msg_box.setInformativeText("Если не сохранить, изменения будут потеряны.")
+
+        save_btn = msg_box.addButton("Сохранить", QMessageBox.AcceptRole)
+        discard_btn = msg_box.addButton("Не сохранять", QMessageBox.DestructiveRole)
+        cancel_btn = msg_box.addButton("Отмена", QMessageBox.RejectRole)
+        msg_box.setDefaultButton(save_btn)
+
+        msg_box.exec()
+
+        clicked = msg_box.clickedButton()
+        if clicked == cancel_btn:
+            return False
+
+        if clicked == discard_btn:
+            self._set_modified(False)
+            return True
+
+        # save_btn
+        if self.current_file:
+            return bool(self._on_save())
+
+        return bool(self._on_save_as())
+
+    def closeEvent(self, event):  # noqa: N802 (Qt naming)
+        """Перехват закрытия окна для защиты от потери данных."""
+        if self.is_modified:
+            if not self._maybe_save_changes():
+                event.ignore()
+                return
+        event.accept()
 
     def _setup_ui(self):
         """Настройка UI"""
@@ -226,6 +290,11 @@ class MainWindow(QMainWindow):
 
     def _on_open(self):
         """Обработчик открытия файла"""
+        # Если текущая модель изменена, спросим что делать
+        if self.viewport and self.viewport.current_mesh and self.is_modified:
+            if not self._maybe_save_changes():
+                return
+
         file_name, _ = QFileDialog.getOpenFileName(
             self, "Открыть STL файл", "", Config.get_file_filter()
         )
@@ -243,7 +312,7 @@ class MainWindow(QMainWindow):
                 
                 self.viewport.load_mesh(mesh)
                 self.current_file = file_name
-                self.is_modified = False
+                self._set_modified(False)
 
                 # Включаем действия
                 self.save_action.setEnabled(True)
@@ -264,6 +333,7 @@ class MainWindow(QMainWindow):
                     f"Загружено: {Path(file_name).name} ({mesh.n_cells} треугольников)", 
                     5000
                 )
+                self._update_window_title()
             except FileNotFoundError:
                 self.setCursor(QCursor(Qt.ArrowCursor))
                 QMessageBox.critical(
@@ -294,7 +364,7 @@ class MainWindow(QMainWindow):
                     f"Убедитесь, что файл является корректным STL."
                 )
 
-    def _on_save(self):
+    def _on_save(self) -> bool:
         """Обработчик сохранения файла"""
         if self.current_file and self.viewport.current_mesh:
             self.statusBar().showMessage("Сохранение...")
@@ -302,12 +372,13 @@ class MainWindow(QMainWindow):
             
             try:
                 STLExporter.save(self.viewport.current_mesh, self.current_file)
-                self.is_modified = False
+                self._set_modified(False)
                 self.setCursor(QCursor(Qt.ArrowCursor))
                 self.statusBar().showMessage(
                     f"Сохранено: {Path(self.current_file).name}", 
                     3000
                 )
+                return True
             except PermissionError:
                 self.setCursor(QCursor(Qt.ArrowCursor))
                 QMessageBox.critical(
@@ -331,8 +402,9 @@ class MainWindow(QMainWindow):
                     "Ошибка сохранения", 
                     f"Не удалось сохранить файл:\n{str(e)}"
                 )
+        return False
 
-    def _on_save_as(self):
+    def _on_save_as(self) -> bool:
         """Обработчик сохранения файла как"""
         if self.viewport.current_mesh:
             # Предлагаем имя по умолчанию
@@ -357,12 +429,14 @@ class MainWindow(QMainWindow):
                 try:
                     STLExporter.save(self.viewport.current_mesh, file_name)
                     self.current_file = file_name
-                    self.is_modified = False
+                    self._set_modified(False)
                     self.setCursor(QCursor(Qt.ArrowCursor))
                     self.statusBar().showMessage(
                         f"Сохранено: {Path(file_name).name}", 
                         3000
                     )
+                    self._update_window_title()
+                    return True
                 except PermissionError:
                     self.setCursor(QCursor(Qt.ArrowCursor))
                     QMessageBox.critical(
@@ -386,6 +460,7 @@ class MainWindow(QMainWindow):
                         "Ошибка сохранения", 
                         f"Не удалось сохранить файл:\n{str(e)}"
                     )
+        return False
 
     def _on_wireframe(self):
         """Переключение в режим каркаса"""
@@ -509,7 +584,7 @@ class MainWindow(QMainWindow):
                 repaired_mesh = processor.repair()
 
                 self.viewport.load_mesh(repaired_mesh)
-                self.is_modified = True
+                self._set_modified(True)
                 
                 # Повторный анализ
                 self._perform_analysis()
@@ -548,7 +623,7 @@ class MainWindow(QMainWindow):
                 fixed_mesh = processor.fix_normals()
 
                 self.viewport.load_mesh(fixed_mesh)
-                self.is_modified = True
+                self._set_modified(True)
                 
                 # Повторный анализ
                 self._perform_analysis()

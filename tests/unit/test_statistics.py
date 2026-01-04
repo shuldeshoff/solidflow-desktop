@@ -3,12 +3,12 @@
 """
 
 import pytest
-import pyvista as pv
 from solidflow.analysis.statistics import MeshStatistics
 
 
 def test_statistics_creation():
     """Тест создания статистики"""
+    pv = pytest.importorskip("pyvista")
     mesh = pv.Cube()
     stats = MeshStatistics(mesh)
 
@@ -17,6 +17,7 @@ def test_statistics_creation():
 
 def test_statistics_geometry_info():
     """Тест получения информации о геометрии"""
+    pv = pytest.importorskip("pyvista")
     mesh = pv.Cube()
     stats = MeshStatistics(mesh)
 
@@ -30,6 +31,7 @@ def test_statistics_geometry_info():
 
 def test_statistics_size_info():
     """Тест получения размеров"""
+    pv = pytest.importorskip("pyvista")
     mesh = pv.Cube()
     stats = MeshStatistics(mesh)
 
@@ -45,6 +47,7 @@ def test_statistics_size_info():
 
 def test_statistics_compute_all():
     """Тест вычисления всей статистики"""
+    pv = pytest.importorskip("pyvista")
     mesh = pv.Cube()
     stats = MeshStatistics(mesh)
 
